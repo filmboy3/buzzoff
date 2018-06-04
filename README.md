@@ -1,5 +1,7 @@
 # buzzoff
 
+CHECK OUT THE DEMO AT buzzoff.surge.sh
+
 Protect the Queen! Welcome to BUZZ 🐝 OFF, the 2-player game of spelling bees!
 
 In this game, players command a colony of bees (letters) who make words to seek-and-destroy a rival Queen -- the letter 'Q'. 
