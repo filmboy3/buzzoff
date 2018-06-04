@@ -1,6 +1,6 @@
 # buzzoff
 
-CHECK OUT THE DEMO AT buzzoff.surge.sh
+CHECK OUT THE DEMO AT [a link](https://buzzoff.surge.sh)
 
 Protect the Queen! Welcome to BUZZ 🐝 OFF, the 2-player game of spelling bees!
 
