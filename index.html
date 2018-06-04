@@ -1,0 +1,1099 @@
+
+<!DOCTYPE html>
+<!-- This is a strategic word game (think Scrabble meets Stratego) I invented and subsequently programmed during a two week vacation in Maine in August 2017. I probably should have been looking out at the beautiful lake rather than at my computer ... -->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BUZZ-OFF | Spelling Bees Game!</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+
+<link rel="stylesheet" href="style.css">
+<!-- This alphaListAAA is the heaviest piece of this program, since it has over 150,000 words taken from a github .txt of the official scrabble dictionary. It's used to check whether a player's word is valid and also helps the AI create the optimum word for it's current difficulty level.  -->
+<script src="alphaListAAA.js"></script>
+<script src="SpellingGame.js"></script>
+<script src="twomoji.min.js"></script>
+<link href="modal.css" rel="stylesheet"/>
+<script type="application/javascript" src="modal.js"></script>
+<audio id="audioShort" src="BuzzShort2.mp3" preload="auto"></audio>
+<audio id="audioLong" src="BuzzLong2.mp3" preload="auto"></audio>
+
+<!-- Global Site Tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-105746709-1"></script>
+      <script>
+        (function(t,u,r,b,o,s){
+          o=document.createElement(u);
+          o.setAttribute('data-turbojs', b);
+          o.async=1;o.src=r;
+          s=t.getElementsByTagName(u)[0];
+          s.parentNode.insertBefore(o, null);
+        })(document, 'script',
+          "//dooe3vx785zy.cloudfront.net/assets/turbojs/8/turbo.js?version=8",
+          '_squish.js');
+      </script>
+    
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+
+  gtag('config', 'UA-105746709-1');
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-105746709-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+</head>
+
+<body>
+
+  <div class= "centerville"><h2 style = 'font-size:25px;color:#ffbc06;margin-top:0%;'>Buzz &#x1f41d; Off!</h2><button type="button" class="btn" data-target="modal_dialog_ID" data-toggle="modal">Rules</button><button type="button" onclick="adjustDifficulty()" class="btn">Change Difficulty</button><button type="button" onclick="resetGame()" class="btn">Restart</button></div> <div id="banner" class="colorGreen"><h1 id = "bannerWord">GREEN'S TURN</h1></div><h2 id="poolList"></h2></div>
+
+  <div id="modal_dialog_ID" class="modal">
+    <div class="modal-window">
+        <!-- <span class="close" data-dismiss="modal">&times;</span> -->
+       Protect the Queen! Welcome to BUZZ &#x1f41d OFF, the 2-player game of spelling bees!<br><br>In this game, players command a colony of bees (letters) who make words to seek-and-destroy a rival Queen -- the letter 'Q'. <br><br>Each turn, players move four honeycomb spaces around the hive -- one bee may move all four spaces, or the moves may be split up.<br><br>When a bee attacks an opponent's bee, they have a BUZZ-OFF, where both players must spell their best word using the letter they attacked or defended with, plus a pool of six communal letters. Additionally, if a player has other bees bordering their opponent's BUZZ-OFF bee on any side, those letters ('Support Bees') are added to that player's pool of spellable letters.<br><br>Words are scored by the sum of their letters' point values (found on the bottom of each bee). The player with the lower-scoring word loses their BUZZ-OFF bee, which is removed from the game, but does not lose any 'Support Bees'. In the case of a tied score, the longer word wins -- in the case of a 2nd tie, the defender wins.<br><br>When a bee reaches the back row of their opponent's side, players have the option to convert that letter to blank (0 point value).<br><br>Players' letters are not visible to their opponent until their bee is in a BUZZ-OFF -- after the BUZZ-OFF, the winning bee's letter is visible for the remainder of the game.<br><br>Once a player successfully defeats their opponent's 'Q' in a BUZZ-OFF, the Queen is vanquished and the game is over!<br><br>CONTROLS: To move a bee, single-click on it, then single-click again on the desired move space. (Bees cannot swap/jump spaces)<br><br>Copyright &#x1f41d 2017, Jonathan Schwartz -- gamutgamer@gmail.com <br><br>
+       <button data-dismiss="modal">Close</button>
+    </div>
+</div>
+  
+  <!-- <div id="banner" class="colorGreen"><h1 id = "bannerWord">GREEN'S TURN</h1></div><h2 id="poolList"></h2> -->
+  <div class="container">
+    <div class="honeycomb ">
+     <div class="hexes-1 column"> <a id="col1_row1" class="hex">
+        <div class="wrapper">
+          <div id="col1_row1_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col1_row2" class="hex">
+        <div class="wrapper">
+          <div id="col1_row2_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col1_row3" class="hex">
+        <div class="wrapper">
+          <div id="col1_row3_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col1_row4" class="hex">
+        <div class="wrapper">
+          <div id="col1_row4_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+        <a id="col1_row5" class="hex">
+        <div class="wrapper">
+          <div id="col1_row5_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+        <a id="col1_row6" class="hex">
+        <div class="wrapper">
+          <div id="col1_row6_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+        <a id="col1_row7" class="hex">
+        <div class="wrapper">
+          <div id="col1_row7_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+        <a id="col1_row8" class="hex">
+        <div class="wrapper">
+          <div id="col1_row8_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+        <a id="col1_row9" class="hex">
+        <div class="wrapper">
+          <div id="col1_row9_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+         <a id="col1_row10" class="hex">
+        <div class="wrapper">
+          <div id="col1_row10_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+         <a id="col1_row11" class="hex">
+        <div class="wrapper">
+          <div id="col1_row11_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+         <a id="col1_row12" class="hex">
+        <div class="wrapper">
+          <div id="col1_row12_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+         <a id="col1_row13" class="hex">
+        <div class="wrapper">
+          <div id="col1_row13_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+        <a id="col1_row14" class="hex">
+        <div class="wrapper">
+          <div id="col1_row14_color" class="hexagon color-8"></div>
+        </div>
+        <span id="col1_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+         </div>
+        <div class="hexes-2 column"> <a id="col2_row1" class="hex">
+              <div class="wrapper">
+                <div id="col2_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col2_row2" class="hex">
+              <div class="wrapper">
+                <div id="col2_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col2_row3" class="hex">
+              <div class="wrapper">
+                <div id="col2_row3_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col2_row4" class="hex">
+              <div class="wrapper">
+                <div id="col2_row4_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col2_row5" class="hex">
+              <div class="wrapper">
+                <div id="col2_row5_color" class="hexagon color-1" onclick= "activateHex(2, 5)"></div>
+              </div>
+              <span id="col2_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col2_row6" class="hex">
+              <div class="wrapper">
+                <div id="col2_row6_color" class="hexagon color-1" onclick= "activateHex(2, 6)"></div>
+              </div>
+              <span id="col2_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col2_row7" class="hex">
+              <div class="wrapper">
+                <div id="col2_row7_color" class="hexagon color-1" onclick= "activateHex(2, 7)"></div>
+              </div>
+              <span id="col2_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col2_row8" class="hex">
+              <div class="wrapper">
+                <div id="col2_row8_color" class="hexagon color-1" onclick= "activateHex(2, 8)"></div>
+              </div>
+              <span id="col2_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col2_row9" class="hex">
+              <div class="wrapper">
+                <div id="col2_row9_color" class="hexagon color-1" onclick= "activateHex(2, 9)"></div>
+              </div>
+              <span id="col2_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col2_row10" class="hex">
+              <div class="wrapper">
+                <div id="col2_row10_color" class="hexagon color-1" onclick= "activateHex(2, 10)"></div>
+              </div>
+              <span id="col2_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col2_row11" class="hex">
+              <div class="wrapper">
+                <div id="col2_row11_color" class="hexagon color-1" onclick= "activateHex(2, 11)"></div>
+              </div>
+              <span id="col2_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col2_row12" class="hex">
+              <div class="wrapper">
+                <div id="col2_row12_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col2_row13" class="hex">
+              <div class="wrapper">
+                <div id="col2_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col2_row14" class="hex">
+              <div class="wrapper">
+                <div id="col2_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col2_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-3 column"> <a id="col3_row1" class="hex">
+              <div class="wrapper">
+                <div id="col3_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col3_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col3_row2" class="hex">
+              <div class="wrapper">
+                <div id="col3_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col3_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col3_row3" class="hex">
+              <div class="wrapper">
+                <div id="col3_row3_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col3_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col3_row4" class="hex">
+              <div class="wrapper">
+                <div id="col3_row4_color" class="hexagon color-1" onclick= "activateHex(3, 4)"></div>
+              </div>
+              <span id="col3_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col3_row5" class="hex">
+              <div class="wrapper">
+                <div id="col3_row5_color" class="hexagon color-2" onclick= "activateHex(3, 5)"></div>
+              </div>
+              <span id="col3_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col3_row6" class="hex">
+              <div class="wrapper">
+                <div id="col3_row6_color" class="hexagon color-2" onclick= "activateHex(3, 6)"></div>
+              </div>
+              <span id="col3_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col3_row7" class="hex">
+              <div class="wrapper">
+                <div id="col3_row7_color" class="hexagon color-2" onclick= "activateHex(3, 7)"></div>
+              </div>
+              <span id="col3_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col3_row8" class="hex">
+              <div class="wrapper">
+                <div id="col3_row8_color" class="hexagon color-2" onclick= "activateHex(3, 8)"></div>
+              </div>
+              <span id="col3_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col3_row9" class="hex">
+              <div class="wrapper">
+                <div id="col3_row9_color" class="hexagon color-2" onclick= "activateHex(3, 9)"></div>
+              </div>
+              <span id="col3_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col3_row10" class="hex">
+              <div class="wrapper">
+                <div id="col3_row10_color" class="hexagon color-2" onclick= "activateHex(3, 10)"></div>
+              </div>
+              <span id="col3_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col3_row11" class="hex">
+              <div class="wrapper">
+                <div id="col3_row11_color" class="hexagon color-1" onclick= "activateHex(3, 11)"></div>
+              </div>
+              <span id="col3_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col3_row12" class="hex">
+              <div class="wrapper">
+                <div id="col3_row12_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col3_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col3_row13" class="hex">
+              <div class="wrapper">
+                <div id="col3_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col3_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col3_row14" class="hex">
+              <div class="wrapper">
+                <div id="col3_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col3_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-4 column"> <a id="col4_row1" class="hex">
+              <div class="wrapper">
+                <div id="col4_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col4_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col4_row2" class="hex">
+              <div class="wrapper">
+                <div id="col4_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col4_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col4_row3" class="hex">
+              <div class="wrapper">
+                <div id="col4_row3_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col4_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col4_row4" class="hex">
+              <div class="wrapper">
+                <div id="col4_row4_color" class="hexagon color-1" onclick= "activateHex(4, 4)"></div>
+              </div>
+              <span id="col4_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col4_row5" class="hex">
+              <div class="wrapper">
+                <div id="col4_row5_color" class="hexagon color-2" onclick= "activateHex(4, 5)"></div>
+              </div>
+              <span id="col4_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col4_row6" class="hex">
+              <div class="wrapper">
+                <div id="col4_row6_color" class="hexagon color-2" onclick= "activateHex(4, 6)"></div>
+              </div>
+              <span id="col4_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col4_row7" class="hex">
+              <div class="wrapper">
+                <div id="col4_row7_color" class="hexagon color-2" onclick= "activateHex(4, 7)"></div>
+              </div>
+              <span id="col4_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col4_row8" class="hex">
+              <div class="wrapper">
+                <div id="col4_row8_color" class="hexagon color-2" onclick= "activateHex(4, 8)"></div>
+              </div>
+              <span id="col4_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col4_row9" class="hex">
+              <div class="wrapper">
+                <div id="col4_row9_color" class="hexagon color-2" onclick= "activateHex(4, 9)"></div>
+              </div>
+              <span id="col4_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col4_row10" class="hex">
+              <div class="wrapper">
+                <div id="col4_row10_color" class="hexagon color-2" onclick= "activateHex(4, 10)"></div>
+              </div>
+              <span id="col4_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col4_row11" class="hex">
+              <div class="wrapper">
+                <div id="col4_row11_color" class="hexagon color-2" onclick= "activateHex(4, 11)"></div>
+              </div>
+              <span id="col4_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col4_row12" class="hex">
+              <div class="wrapper">
+                <div id="col4_row12_color" class="hexagon color-1" onclick= "activateHex(4, 12)"></div>
+              </div>
+              <span id="col4_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col4_row13" class="hex">
+              <div class="wrapper">
+                <div id="col4_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col4_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col4_row14" class="hex">
+              <div class="wrapper">
+                <div id="col4_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col4_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-5 column"> <a id="col5_row1" class="hex">
+              <div class="wrapper">
+                <div id="col5_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col5_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col5_row2" class="hex">
+              <div class="wrapper">
+                <div id="col5_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col5_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col5_row3" class="hex">
+              <div class="wrapper">
+                <div id="col5_row3_color" class="hexagon color-1" onclick= "activateHex(5, 3)"></div>
+              </div>
+              <span id="col5_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col5_row4" class="hex">
+              <div class="wrapper">
+                <div id="col5_row4_color" class="hexagon color-2" onclick= "activateHex(5, 4)"></div>
+              </div>
+              <span id="col5_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col5_row5" class="hex">
+              <div class="wrapper">
+                <div id="col5_row5_color" class="hexagon color-2" onclick= "activateHex(5, 5)"></div>
+              </div>
+              <span id="col5_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col5_row6" class="hex">
+              <div class="wrapper">
+                <div id="col5_row6_color" class="hexagon color-2" onclick= "activateHex(5, 6)"></div>
+              </div>
+              <span id="col5_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col5_row7" class="hex">
+              <div class="wrapper">
+                <div id="col5_row7_color" class="hexagon color-2" onclick= "activateHex(5, 7)"></div>
+              </div>
+              <span id="col5_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col5_row8" class="hex">
+              <div class="wrapper">
+                <div id="col5_row8_color" class="hexagon color-2" onclick= "activateHex(5, 8)"></div>
+              </div>
+              <span id="col5_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col5_row9" class="hex">
+              <div class="wrapper">
+                <div id="col5_row9_color" class="hexagon color-2" onclick= "activateHex(5, 9)"></div>
+              </div>
+              <span id="col5_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col5_row10" class="hex">
+              <div class="wrapper">
+                <div id="col5_row10_color" class="hexagon color-2" onclick= "activateHex(5, 10)"></div>
+              </div>
+              <span id="col5_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col5_row11" class="hex">
+              <div class="wrapper">
+                <div id="col5_row11_color" class="hexagon color-2" onclick= "activateHex(5, 11)"></div>
+              </div>
+              <span id="col5_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col5_row12" class="hex">
+              <div class="wrapper">
+                <div id="col5_row12_color" class="hexagon color-1" onclick= "activateHex(5, 12)"></div>
+              </div>
+              <span id="col5_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col5_row13" class="hex">
+              <div class="wrapper">
+                <div id="col5_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col5_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col5_row14" class="hex">
+              <div class="wrapper">
+                <div id="col5_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col5_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-6 column"> <a id="col6_row1" class="hex">
+              <div class="wrapper">
+                <div id="col6_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col6_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col6_row2" class="hex">
+              <div class="wrapper">
+                <div id="col6_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col6_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col6_row3" class="hex">
+              <div class="wrapper">
+                <div id="col6_row3_color" class="hexagon color-1" onclick= "activateHex(6, 3)"></div>
+              </div>
+              <span id="col6_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col6_row4" class="hex">
+              <div class="wrapper">
+                <div id="col6_row4_color" class="hexagon color-2" onclick= "activateHex(6, 4)"></div>
+              </div>
+              <span id="col6_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col6_row5" class="hex">
+              <div class="wrapper">
+                <div id="col6_row5_color" class="hexagon color-2" onclick= "activateHex(6, 5)"></div>
+              </div>
+              <span id="col6_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col6_row6" class="hex">
+              <div class="wrapper">
+                <div id="col6_row6_color" class="hexagon color-2" onclick= "activateHex(6, 6)"></div>
+              </div>
+              <span id="col6_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col6_row7" class="hex">
+              <div class="wrapper">
+                <div id="col6_row7_color" class="hexagon color-2" onclick= "activateHex(6, 7)"></div>
+              </div>
+              <span id="col6_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col6_row8" class="hex">
+              <div class="wrapper">
+                <div id="col6_row8_color" class="hexagon color-2" onclick= "activateHex(6, 8)"></div>
+              </div>
+              <span id="col6_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col6_row9" class="hex">
+              <div class="wrapper">
+                <div id="col6_row9_color" class="hexagon color-2" onclick= "activateHex(6, 9)"></div>
+              </div>
+              <span id="col6_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col6_row10" class="hex">
+              <div class="wrapper">
+                <div id="col6_row10_color" class="hexagon color-2" onclick= "activateHex(6, 10)"></div>
+              </div>
+              <span id="col6_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col6_row11" class="hex">
+              <div class="wrapper">
+                <div id="col6_row11_color" class="hexagon color-2" onclick= "activateHex(6, 11)"></div>
+              </div>
+              <span id="col6_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col6_row12" class="hex">
+              <div class="wrapper">
+                <div id="col6_row12_color" class="hexagon color-2" onclick= "activateHex(6, 12)"></div>
+              </div>
+              <span id="col6_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col6_row13" class="hex">
+              <div class="wrapper">
+                <div id="col6_row13_color" class="hexagon color-1" onclick= "activateHex(6, 13)"></div>
+              </div>
+              <span id="col6_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col6_row14" class="hex">
+              <div class="wrapper">
+                <div id="col6_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col6_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div> 
+        <div class="hexes-7 column"> <a id="col7_row1" class="hex">
+              <div class="wrapper">
+                <div id="col7_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col7_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col7_row2" class="hex">
+              <div class="wrapper">
+                <div id="col7_row2_color" class="hexagon color-1" onclick= "activateHex(7, 2)"></div>
+              </div>
+              <span id="col7_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col7_row3" class="hex">
+              <div class="wrapper">
+                <div id="col7_row3_color" class="hexagon color-1" onclick= "activateHex(7, 3)"></div>
+              </div>
+              <span id="col7_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col7_row4" class="hex">
+              <div class="wrapper">
+                <div id="col7_row4_color" class="hexagon color-1" onclick= "activateHex(7, 4)"></div>
+              </div>
+              <span id="col7_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col7_row5" class="hex">
+              <div class="wrapper">
+                <div id="col7_row5_color" class="hexagon color-1" onclick= "activateHex(7, 5)"></div>
+              </div>
+              <span id="col7_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col7_row6" class="hex">
+              <div class="wrapper">
+                <div id="col7_row6_color" class="hexagon color-1" onclick= "activateHex(7, 6)"></div>
+              </div>
+              <span id="col7_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col7_row7" class="hex">
+              <div class="wrapper">
+                <div id="col7_row7_color" class="hexagon color-1" onclick= "activateHex(7, 7)"></div>
+              </div>
+              <span id="col7_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col7_row8" class="hex">
+              <div class="wrapper">
+                <div id="col7_row8_color" class="hexagon color-1" onclick= "activateHex(7, 8)"></div>
+              </div>
+              <span id="col7_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col7_row9" class="hex">
+              <div class="wrapper">
+                <div id="col7_row9_color" class="hexagon color-1" onclick= "activateHex(7, 9)"></div>
+              </div>
+              <span id="col7_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col7_row10" class="hex">
+              <div class="wrapper">
+                <div id="col7_row10_color" class="hexagon color-1" onclick= "activateHex(7, 10)"></div>
+              </div>
+              <span id="col7_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col7_row11" class="hex">
+              <div class="wrapper">
+                <div id="col7_row11_color" class="hexagon color-1" onclick= "activateHex(7, 11)"></div>
+              </div>
+              <span id="col7_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col7_row12" class="hex">
+              <div class="wrapper">
+                <div id="col7_row12_color" class="hexagon color-1" onclick= "activateHex(7, 12)"></div>
+              </div>
+              <span id="col7_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col7_row13" class="hex">
+              <div class="wrapper">
+                <div id="col7_row13_color" class="hexagon color-1" onclick= "activateHex(7, 13)"></div>
+              </div>
+              <span id="col7_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col7_row14" class="hex">
+              <div class="wrapper">
+                <div id="col7_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col7_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-8 column"> <a id="col8_row1" class="hex">
+              <div class="wrapper">
+                <div id="col8_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col8_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col8_row2" class="hex">
+              <div class="wrapper">
+                <div id="col8_row2_color" class="hexagon color-1" onclick= "activateHex(8, 2)"></div>
+              </div>
+              <span id="col8_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col8_row3" class="hex">
+              <div class="wrapper">
+                <div id="col8_row3_color" class="hexagon color-1" onclick= "activateHex(8, 3)"></div>
+              </div>
+              <span id="col8_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col8_row4" class="hex">
+              <div class="wrapper">
+                <div id="col8_row4_color" class="hexagon color-1" onclick= "activateHex(8, 4)"></div>
+              </div>
+              <span id="col8_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col8_row5" class="hex">
+              <div class="wrapper">
+                <div id="col8_row5_color" class="hexagon color-1" onclick= "activateHex(8, 5)"></div>
+              </div>
+              <span id="col8_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col8_row6" class="hex">
+              <div class="wrapper">
+                <div id="col8_row6_color" class="hexagon color-1" onclick= "activateHex(8, 6)"></div>
+              </div>
+              <span id="col8_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col8_row7" class="hex">
+              <div class="wrapper">
+                <div id="col8_row7_color" class="hexagon color-1" onclick= "activateHex(8, 7)"></div>
+              </div>
+              <span id="col8_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col8_row8" class="hex">
+              <div class="wrapper">
+                <div id="col8_row8_color" class="hexagon color-1" onclick= "activateHex(8, 8)"></div>
+              </div>
+              <span id="col8_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col8_row9" class="hex">
+              <div class="wrapper">
+                <div id="col8_row9_color" class="hexagon color-1" onclick= "activateHex(8, 9)"></div>
+              </div>
+              <span id="col8_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col8_row10" class="hex">
+              <div class="wrapper">
+                <div id="col8_row10_color" class="hexagon color-1" onclick= "activateHex(8, 10)"></div>
+              </div>
+              <span id="col8_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col8_row11" class="hex">
+              <div class="wrapper">
+                <div id="col8_row11_color" class="hexagon color-1" onclick= "activateHex(8, 11)"></div>
+              </div>
+              <span id="col8_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col8_row12" class="hex">
+              <div class="wrapper">
+                <div id="col8_row12_color" class="hexagon color-1" onclick= "activateHex(8, 12)"></div>
+              </div>
+              <span id="col8_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col8_row13" class="hex">
+              <div class="wrapper">
+                <div id="col8_row13_color" class="hexagon color-1" onclick= "activateHex(8, 13)"></div>
+              </div>
+              <span id="col8_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col8_row14" class="hex">
+              <div class="wrapper">
+                <div id="col8_row14_color" class="hexagon color-1" onclick= "activateHex(8, 14)"></div>
+              </div>
+              <span id="col8_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-9 column"> <a id="col9_row1" class="hex">
+              <div class="wrapper">
+                <div id="col9_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col9_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col9_row2" class="hex">
+              <div class="wrapper">
+                <div id="col9_row2_color" class="hexagon color-1" onclick= "activateHex(9, 2)"></div>
+              </div>
+              <span id="col9_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col9_row3" class="hex">
+              <div class="wrapper">
+                <div id="col9_row3_color" class="hexagon color-1" onclick= "activateHex(9, 3)"></div>
+              </div>
+              <span id="col9_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col9_row4" class="hex">
+              <div class="wrapper">
+                <div id="col9_row4_color" class="hexagon color-1" onclick= "activateHex(9, 4)"></div>
+              </div>
+              <span id="col9_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col9_row5" class="hex">
+              <div class="wrapper">
+                <div id="col9_row5_color" class="hexagon color-1" onclick= "activateHex(9, 5)"></div>
+              </div>
+              <span id="col9_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col9_row6" class="hex">
+              <div class="wrapper">
+                <div id="col9_row6_color" class="hexagon color-1" onclick= "activateHex(9, 6)"></div>
+              </div>
+              <span id="col9_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col9_row7" class="hex">
+              <div class="wrapper">
+                <div id="col9_row7_color" class="hexagon color-1" onclick= "activateHex(9, 7)"></div>
+              </div>
+              <span id="col9_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col9_row8" class="hex">
+              <div class="wrapper">
+                <div id="col9_row8_color" class="hexagon color-1" onclick= "activateHex(9, 8)"></div>
+              </div>
+              <span id="col9_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col9_row9" class="hex">
+              <div class="wrapper">
+                <div id="col9_row9_color" class="hexagon color-1" onclick= "activateHex(9, 9)"></div>
+              </div>
+              <span id="col9_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col9_row10" class="hex">
+              <div class="wrapper">
+                <div id="col9_row10_color" class="hexagon color-1" onclick= "activateHex(9, 10)"></div>
+              </div>
+              <span id="col9_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col9_row11" class="hex">
+              <div class="wrapper">
+                <div id="col9_row11_color" class="hexagon color-1" onclick= "activateHex(9, 11)"></div>
+              </div>
+              <span id="col9_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col9_row12" class="hex">
+              <div class="wrapper">
+                <div id="col9_row12_color" class="hexagon color-1" onclick= "activateHex(9, 12)"></div>
+              </div>
+              <span id="col9_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col9_row13" class="hex">
+              <div class="wrapper">
+                <div id="col9_row13_color" class="hexagon color-1" onclick= "activateHex(9, 13)"></div>
+              </div>
+              <span id="col9_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col9_row14" class="hex">
+              <div class="wrapper">
+                <div id="col9_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col9_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-10 column"> <a id="col10_row1" class="hex">
+              <div class="wrapper">
+                <div id="col10_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col10_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col10_row2" class="hex">
+              <div class="wrapper">
+                <div id="col10_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col10_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col10_row3" class="hex">
+              <div class="wrapper">
+                <div id="col10_row3_color" class="hexagon color-1" onclick= "activateHex(10, 3)"></div>
+              </div>
+              <span id="col10_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col10_row4" class="hex">
+              <div class="wrapper">
+                <div id="col10_row4_color" class="hexagon color-3" onclick= "activateHex(10, 4)"></div>
+              </div>
+              <span id="col10_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col10_row5" class="hex">
+              <div class="wrapper">
+                <div id="col10_row5_color" class="hexagon color-3" onclick= "activateHex(10, 5)"></div>
+              </div>
+              <span id="col10_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col10_row6" class="hex">
+              <div class="wrapper">
+                <div id="col10_row6_color" class="hexagon color-3" onclick= "activateHex(10, 6)"></div>
+              </div>
+              <span id="col10_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col10_row7" class="hex">
+              <div class="wrapper">
+                <div id="col10_row7_color" class="hexagon color-3" onclick= "activateHex(10, 7)"></div>
+              </div>
+              <span id="col10_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col10_row8" class="hex">
+              <div class="wrapper">
+                <div id="col10_row8_color" class="hexagon color-3" onclick= "activateHex(10, 8)"></div>
+              </div>
+              <span id="col10_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col10_row9" class="hex">
+              <div class="wrapper">
+                <div id="col10_row9_color" class="hexagon color-3" onclick= "activateHex(10, 9)"></div>
+              </div>
+              <span id="col10_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col10_row10" class="hex">
+              <div class="wrapper">
+                <div id="col10_row10_color" class="hexagon color-3" onclick= "activateHex(10, 10)"></div>
+              </div>
+              <span id="col10_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col10_row11" class="hex">
+              <div class="wrapper">
+                <div id="col10_row11_color" class="hexagon color-3" onclick= "activateHex(10, 11)"></div>
+              </div>
+              <span id="col10_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col10_row12" class="hex">
+              <div class="wrapper">
+                <div id="col10_row12_color" class="hexagon color-3" onclick= "activateHex(10, 12)"></div>
+              </div>
+              <span id="col10_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col10_row13" class="hex">
+              <div class="wrapper">
+                <div id="col10_row13_color" class="hexagon color-1" onclick= "activateHex(10, 13)"></div>
+              </div>
+              <span id="col10_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col10_row14" class="hex">
+              <div class="wrapper">
+                <div id="col10_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col10_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-11 column"> <a id="col11_row1" class="hex">
+              <div class="wrapper">
+                <div id="col11_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col11_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col11_row2" class="hex">
+              <div class="wrapper">
+                <div id="col11_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col11_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col11_row3" class="hex">
+              <div class="wrapper">
+                <div id="col11_row3_color" class="hexagon color-1" onclick= "activateHex(11, 3)"></div>
+              </div>
+              <span id="col11_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col11_row4" class="hex">
+              <div class="wrapper">
+                <div id="col11_row4_color" class="hexagon color-3" onclick= "activateHex(11, 4)"></div>
+              </div>
+              <span id="col11_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col11_row5" class="hex">
+              <div class="wrapper">
+                <div id="col11_row5_color" class="hexagon color-3" onclick= "activateHex(11, 5)"></div>
+              </div>
+              <span id="col11_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col11_row6" class="hex">
+              <div class="wrapper">
+                <div id="col11_row6_color" class="hexagon color-3" onclick= "activateHex(11, 6)"></div>
+              </div>
+              <span id="col11_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col11_row7" class="hex">
+              <div class="wrapper">
+                <div id="col11_row7_color" class="hexagon color-3" onclick= "activateHex(11, 7)"></div>
+              </div>
+              <span id="col11_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col11_row8" class="hex">
+              <div class="wrapper">
+                <div id="col11_row8_color" class="hexagon color-3" onclick= "activateHex(11, 8)"></div>
+              </div>
+              <span id="col11_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col11_row9" class="hex">
+              <div class="wrapper">
+                <div id="col11_row9_color" class="hexagon color-3" onclick= "activateHex(11, 9)"></div>
+              </div>
+              <span id="col11_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col11_row10" class="hex">
+              <div class="wrapper">
+                <div id="col11_row10_color" class="hexagon color-3" onclick= "activateHex(11, 10)"></div>
+              </div>
+              <span id="col11_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col11_row11" class="hex">
+              <div class="wrapper">
+                <div id="col11_row11_color" class="hexagon color-3" onclick= "activateHex(11, 11)"></div>
+              </div>
+              <span id="col11_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col11_row12" class="hex">
+              <div class="wrapper">
+                <div id="col11_row12_color" class="hexagon color-1" onclick= "activateHex(11, 12)"></div>
+              </div>
+              <span id="col11_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col11_row13" class="hex">
+              <div class="wrapper">
+                <div id="col11_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col11_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col11_row14" class="hex">
+              <div class="wrapper">
+                <div id="col11_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col11_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-12 column"> <a id="col12_row1" class="hex">
+              <div class="wrapper">
+                <div id="col12_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col12_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col12_row2" class="hex">
+              <div class="wrapper">
+                <div id="col12_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col12_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col12_row3" class="hex">
+              <div class="wrapper">
+                <div id="col12_row3_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col12_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col12_row4" class="hex">
+              <div class="wrapper">
+                <div id="col12_row4_color" class="hexagon color-1" onclick= "activateHex(12, 4)"></div>
+              </div>
+              <span id="col12_row4_text" class="content"><strong></strong> <small></small> </span> </a>
+              <a id="col12_row5" class="hex">
+              <div class="wrapper">
+                <div id="col12_row5_color" class="hexagon color-3" onclick= "activateHex(12, 5)"></div>
+              </div>
+              <span id="col12_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col12_row6" class="hex">
+              <div class="wrapper">
+                <div id="col12_row6_color" class="hexagon color-3" onclick= "activateHex(12, 6)"></div>
+              </div>
+              <span id="col12_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col12_row7" class="hex">
+              <div class="wrapper">
+                <div id="col12_row7_color" class="hexagon color-3" onclick= "activateHex(12, 7)"></div>
+              </div>
+              <span id="col12_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col12_row8" class="hex">
+              <div class="wrapper">
+                <div id="col12_row8_color" class="hexagon color-3" onclick= "activateHex(12, 8)"></div>
+              </div>
+              <span id="col12_row8_text" class="content"><strong></strong> <small></small> </span> </a>
+              <a id="col12_row9" class="hex">
+              <div class="wrapper">
+                <div id="col12_row9_color" class="hexagon color-3" onclick= "activateHex(12, 9)"></div>
+              </div>
+              <span id="col12_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col12_row10" class="hex">
+              <div class="wrapper">
+                <div id="col12_row10_color" class="hexagon color-3" onclick= "activateHex(12, 10)"></div>
+              </div>
+              <span id="col12_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col12_row11" class="hex">
+              <div class="wrapper">
+                <div id="col12_row11_color" class="hexagon color-3" onclick= "activateHex(12, 11)"></div>
+              </div>
+              <span id="col12_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col12_row12" class="hex">
+              <div class="wrapper">
+                <div id="col12_row12_color" class="hexagon color-1" onclick= "activateHex(12, 12)"></div>
+              </div>
+              <span id="col12_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col12_row13" class="hex">
+              <div class="wrapper">
+                <div id="col12_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col12_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col12_row14" class="hex">
+              <div class="wrapper">
+                <div id="col12_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col12_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-13 column"> <a id="col13_row1" class="hex">
+              <div class="wrapper">
+                <div id="col13_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col13_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col13_row2" class="hex">
+              <div class="wrapper">
+                <div id="col13_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col13_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col13_row3" class="hex">
+              <div class="wrapper">
+                <div id="col13_row3_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col13_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col13_row4" class="hex">
+              <div class="wrapper">
+                <div id="col13_row4_color" class="hexagon color-1" onclick= "activateHex(13, 4)"></div>
+              </div>
+              <span id="col13_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col13_row5" class="hex">
+              <div class="wrapper">
+                <div id="col13_row5_color" class="hexagon color-3" onclick= "activateHex(13, 5)"></div>
+              </div>
+              <span id="col13_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col13_row6" class="hex">
+              <div class="wrapper">
+                <div id="col13_row6_color" class="hexagon color-3" onclick= "activateHex(13, 6)"></div>
+              </div>
+              <span id="col13_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col13_row7" class="hex">
+              <div class="wrapper">
+                <div id="col13_row7_color" class="hexagon color-3" onclick= "activateHex(13, 7)"></div>
+              </div>
+              <span id="col13_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col13_row8" class="hex">
+              <div class="wrapper">
+                <div id="col13_row8_color" class="hexagon color-3" onclick= "activateHex(13, 8)"></div>
+              </div>
+              <span id="col13_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col13_row9" class="hex">
+              <div class="wrapper">
+                <div id="col13_row9_color" class="hexagon color-3" onclick= "activateHex(13, 9)"></div>
+              </div>
+              <span id="col13_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col13_row10" class="hex">
+              <div class="wrapper">
+                <div id="col13_row10_color" class="hexagon color-3" onclick= "activateHex(13, 10)"></div>
+              </div>
+              <span id="col13_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col13_row11" class="hex">
+              <div class="wrapper">
+                <div id="col13_row11_color" class="hexagon color-1" onclick= "activateHex(13, 11)"></div>
+              </div>
+              <span id="col13_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col13_row12" class="hex">
+              <div class="wrapper">
+                <div id="col13_row12_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col13_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col13_row13" class="hex">
+              <div class="wrapper">
+                <div id="col13_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col13_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col13_row14" class="hex">
+              <div class="wrapper">
+                <div id="col13_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col13_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-14 column"> <a id="col14_row1" class="hex">
+              <div class="wrapper">
+                <div id="col14_row1_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col14_row2" class="hex">
+              <div class="wrapper">
+                <div id="col14_row2_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col14_row3" class="hex">
+              <div class="wrapper">
+                <div id="col14_row3_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col14_row4" class="hex">
+              <div class="wrapper">
+                <div id="col14_row4_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col14_row5" class="hex">
+              <div class="wrapper">
+                <div id="col14_row5_color" class="hexagon color-1" onclick= "activateHex(14, 5)"></div>
+              </div>
+              <span id="col14_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col14_row6" class="hex">
+              <div class="wrapper">
+                <div id="col14_row6_color" class="hexagon color-1" onclick= "activateHex(14, 6)"></div>
+              </div>
+              <span id="col14_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col14_row7" class="hex">
+              <div class="wrapper">
+                <div id="col14_row7_color" class="hexagon color-1" onclick= "activateHex(14, 7)"></div>
+              </div>
+              <span id="col14_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col14_row8" class="hex">
+              <div class="wrapper">
+                <div id="col14_row8_color" class="hexagon color-1" onclick= "activateHex(14, 8)"></div>
+              </div>
+              <span id="col14_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col14_row9" class="hex">
+              <div class="wrapper">
+                <div id="col14_row9_color" class="hexagon color-1" onclick= "activateHex(14, 9)"></div>
+              </div>
+              <span id="col14_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col14_row10" class="hex">
+              <div class="wrapper">
+                <div id="col14_row10_color" class="hexagon color-1" onclick= "activateHex(14, 10)"></div>
+              </div>
+              <span id="col14_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col14_row11" class="hex">
+              <div class="wrapper">
+                <div id="col14_row11_color" class="hexagon color-1" onclick= "activateHex(14, 11)"></div>
+              </div>
+              <span id="col14_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col14_row12" class="hex">
+              <div class="wrapper">
+                <div id="col14_row12_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col14_row13" class="hex">
+              <div class="wrapper">
+                <div id="col14_row13_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col14_row14" class="hex">
+              <div class="wrapper">
+                <div id="col14_row14_color" class="hexagon color-1"></div>
+              </div>
+              <span id="col14_row14_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+        <div class="hexes-15 column"> <a id="col15_row1" class="hex">
+              <div class="wrapper">
+                <div id="col15_row1_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row1_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col15_row2" class="hex">
+              <div class="wrapper">
+                <div id="col15_row2_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row2_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col15_row3" class="hex">
+              <div class="wrapper">
+                <div id="col15_row3_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row3_text" class="content"> <strong></strong> <small></small> </span> </a> <a id="col15_row4" class="hex">
+              <div class="wrapper">
+                <div id="col15_row4_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row4_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col15_row5" class="hex">
+              <div class="wrapper">
+                <div id="col15_row5_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row5_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col15_row6" class="hex">
+              <div class="wrapper">
+                <div id="col15_row6_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row6_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col15_row7" class="hex">
+              <div class="wrapper">
+                <div id="col15_row7_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row7_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col15_row8" class="hex">
+              <div class="wrapper">
+                <div id="col15_row8_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row8_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col15_row9" class="hex">
+              <div class="wrapper">
+                <div id="col15_row9_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row9_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col15_row10" class="hex">
+              <div class="wrapper">
+                <div id="col15_row10_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row10_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col15_row11" class="hex">
+              <div class="wrapper">
+                <div id="col15_row11_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row11_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col15_row12" class="hex">
+              <div class="wrapper">
+                <div id="col15_row12_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row12_text" class="content"> <strong></strong> <small></small> </span> </a>
+               <a id="col15_row13" class="hex">
+              <div class="wrapper">
+                <div id="col15_row13_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row13_text" class="content"> <strong></strong> <small></small> </span> </a>
+              <a id="col15_row15" class="hex">
+              <div class="wrapper">
+                <div id="col15_row15_color" class="hexagon color-5"></div>
+              </div>
+              <span id="col15_row15_text" class="content"> <strong></strong> <small></small> </span> </a>
+               </div>
+
+      <div class="shadows"></div>
+    </div>
+
+  </div>
+<meta name='forge-tag' value='forge-token:1504590756' /></body>
+
+
+</html>
